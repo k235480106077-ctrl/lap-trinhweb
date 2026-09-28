@@ -1,0 +1,93 @@
+BÀI TẬP MÔN AN TOÀN VÀ BẢO MẬT THÔNG TIN
+
+TÌM HIỂU DES, AES VÀ RSA
+
+Sinh viên: Nguyễn Văn Tuyến
+
+
+
+1. Mục tiêu bài tập
+Theo yêu cầu bài tập, báo cáo gồm ba nội dung: tìm hiểu các thuật toán mã hóa hiện đại DES và AES; tìm hiểu RSA và nguyên lý sinh cặp khóa; trình bày các mô hình ứng dụng RSA, so sánh thời gian mã hóa/giải mã với AES và đưa ra mô hình kết hợp RSA với AES.
+2. DES và AES
+2.1. DES
+DES (Data Encryption Standard) là một thuật toán mã hóa đối xứng dạng mã khối. DES xử lý dữ liệu theo khối 64 bit và sử dụng khóa hiệu dụng 56 bit. Thuật toán dựa trên cấu trúc Feistel và thực hiện 16 vòng biến đổi. DES có ý nghĩa lịch sử quan trọng nhưng không còn đáp ứng yêu cầu bảo mật hiện đại. NIST đã rút FIPS 46-3 vào ngày 19/05/2005 vì DES không còn cung cấp mức bảo vệ cần thiết.
+Nguồn: NIST FIPS 46-3 và thông báo rút chuẩn DES.
+2.2. Quy trình DES
+1.	Bản rõ được chia thành các khối 64 bit.
+2.	Thực hiện hoán vị ban đầu.
+3.	Mỗi khối đi qua 16 vòng Feistel; mỗi vòng sử dụng một khóa con.
+4.	Thực hiện hoán vị cuối để tạo bản mã.
+5.	Giải mã dùng cùng khóa bí mật nhưng các khóa con được sử dụng theo thứ tự ngược lại.
+2.3. AES
+AES (Advanced Encryption Standard) là chuẩn mã hóa đối xứng dạng mã khối do NIST quy định. FIPS 197 quy định AES-128, AES-192 và AES-256; cả ba xử lý khối dữ liệu 128 bit, còn hậu tố 128/192/256 thể hiện độ dài khóa. Phiên bản FIPS 197 cập nhật năm 2023 không thay đổi kỹ thuật của thuật toán.
+Nguồn: NIST FIPS 197-upd1.
+Đặc điểm	AES-128	AES-192	AES-256
+Độ dài khóa	128 bit	192 bit	256 bit
+Kích thước khối	128 bit	128 bit	128 bit
+Số vòng	10	12	14
+2.4. Quy trình mã hóa AES
+6.	AddRoundKey: kết hợp trạng thái ban đầu với khóa vòng đầu tiên.
+7.	SubBytes: thay thế từng byte theo bảng S-box.
+8.	ShiftRows: dịch vòng các hàng của ma trận trạng thái.
+9.	MixColumns: biến đổi các cột trong các vòng thông thường.
+10.	AddRoundKey: XOR trạng thái với khóa vòng.
+11.	Vòng cuối bỏ bước MixColumns.
+2.5. Quy trình giải mã AES
+Giải mã sử dụng các phép biến đổi nghịch đảo tương ứng: InvShiftRows, InvSubBytes, InvMixColumns và AddRoundKey với các khóa vòng theo thứ tự phù hợp. Kết quả cuối cùng là bản rõ.
+3. Cài đặt AES bằng Python
+Phần thực hành sử dụng Python và thư viện cryptography. Chương trình dùng AES-256-GCM để mã hóa và giải mã một chuỗi văn bản. GCM vừa cung cấp mã hóa vừa kiểm tra tính toàn vẹn của dữ liệu.
+Cài thư viện:
+pip install -r requirements.txt
+Chương trình chính được đặt trong file `aes_demo.py`. Khi chạy, chương trình tạo khóa AES-256, sinh nonce ngẫu nhiên, mã hóa chuỗi, sau đó giải mã và kiểm tra kết quả.
+4. RSA và nguyên lý sinh cặp khóa
+RSA là hệ mật mã khóa công khai. Khác với AES, RSA sử dụng một cặp khóa gồm public key và private key. Public key có thể công khai; private key phải được bảo vệ.
+4.1. Sinh khóa RSA
+12.	Chọn hai số nguyên tố lớn p và q.
+13.	Tính n = p × q.
+14.	Tính φ(n) = (p − 1)(q − 1).
+15.	Chọn e sao cho 1 < e < φ(n) và gcd(e, φ(n)) = 1.
+16.	Tính d là nghịch đảo modulo của e theo φ(n), tức e × d ≡ 1 (mod φ(n)).
+17.	Public key là (e, n); private key là (d, n).
+4.2. Mã hóa và giải mã RSA
+Về mặt nguyên lý, người gửi có thể sử dụng public key của người nhận để bảo vệ dữ liệu/khóa cần gửi; người nhận dùng private key tương ứng để xử lý phần được bảo vệ. Trong hệ thống thực tế, RSA không được dùng để mã hóa lượng dữ liệu lớn trực tiếp như AES mà thường tham gia vào cơ chế thiết lập hoặc bảo vệ khóa.
+5. Các mô hình ứng dụng RSA
+5.1. Xác thực người gửi bằng chữ ký số
+Người gửi tính giá trị băm của dữ liệu và tạo chữ ký bằng private key. Người nhận dùng public key của người gửi để kiểm tra chữ ký và đối chiếu với giá trị băm của dữ liệu nhận được. Mục tiêu là kiểm tra nguồn gốc chữ ký và phát hiện thay đổi dữ liệu.
+Luồng: Dữ liệu → Hash → Ký bằng Private Key → Chữ ký số → Người nhận → Verify bằng Public Key.
+5.2. Bảo vệ khóa cho người nhận
+Public key của người nhận có thể được dùng trong cơ chế khóa công khai để bảo vệ một khóa bí mật được thiết lập cho phiên làm việc. Private key tương ứng chỉ do người nhận giữ.
+5.3. Kết hợp xác thực hai phía
+Hai phía có thể sử dụng chứng thư/chữ ký số và cơ chế khóa công khai để xác thực lẫn nhau, đồng thời sử dụng một khóa đối xứng cho dữ liệu phiên.
+6. So sánh thời gian AES và RSA
+File `benchmark.py` thực hiện phép đo trên chính máy chạy chương trình. AES-256-GCM được đo với dữ liệu 1 KiB; RSA-2048-OAEP được đo với một thông điệp ngắn phù hợp giới hạn của OAEP. Vì vậy, kết quả chỉ dùng để minh họa chênh lệch chi phí tính toán trên máy thực nghiệm, không phải một con số cố định cho mọi máy.
+=== SO SANH THOI GIAN AES VA RSA ===
+AES-256-GCM encrypt 1 KiB : 0.0013 ms
+AES-256-GCM decrypt 1 KiB : 0.0012 ms
+RSA-2048 OAEP encrypt     : 0.0249 ms
+RSA-2048 OAEP decrypt     : 0.2617 ms
+
+Luu y: day la phep do tren mot may cu the, khong phai hang so co dinh.
+RSA khong duoc dung de ma hoa truc tiep du lieu lon nhu AES.
+Nhận xét: phép đo cho thấy RSA có chi phí tính toán lớn hơn AES trong các phép toán tương ứng. Đây cũng là lý do RSA phù hợp với các tác vụ khóa công khai/thiết lập khóa, còn AES phù hợp với việc mã hóa lượng dữ liệu lớn.
+7. Mô hình kết hợp RSA và AES
+Một mô hình hybrid có thể thực hiện như sau:
+18.	Bước 1: Hai bên xác thực khóa công khai/chứng thư theo cơ chế của hệ thống.
+19.	Bước 2: Sinh một khóa AES ngẫu nhiên cho phiên làm việc.
+20.	Bước 3: Bảo vệ hoặc thiết lập khóa phiên bằng cơ chế khóa công khai.
+21.	Bước 4: Dùng AES để mã hóa dữ liệu chính vì AES có hiệu năng phù hợp với dữ liệu lớn.
+22.	Bước 5: Bên nhận khôi phục khóa phiên, sau đó dùng AES để giải mã dữ liệu.
+23.	Bước 6: Có thể dùng chữ ký số để xác thực nguồn gốc và kiểm tra tính toàn vẹn theo thiết kế của giao thức.
+8. Bảng tổng hợp
+Tiêu chí	DES	AES	RSA
+Loại	Đối xứng	Đối xứng	Bất đối xứng
+Khối dữ liệu	64 bit	128 bit	Không phải mã khối dữ liệu lớn
+Khóa	56 bit hiệu dụng	128/192/256 bit	Cặp public/private
+Mục đích chính	Lịch sử/legacy	Mã hóa dữ liệu	Khóa công khai, chữ ký/thiết lập khóa
+Hiệu năng	Nhanh nhưng không còn phù hợp	Nhanh	Chậm hơn AES
+9. Kết luận
+Qua bài tập có thể phân biệt ba thuật toán: DES là thuật toán đối xứng cũ đã bị rút khỏi chuẩn do không còn đáp ứng yêu cầu bảo mật; AES là chuẩn mã hóa đối xứng với các biến thể AES-128, AES-192 và AES-256; RSA là hệ mật mã khóa công khai sử dụng cặp khóa. Trong mô hình kết hợp, khóa công khai đảm nhiệm vụ thiết lập/bảo vệ khóa phiên và xác thực theo thiết kế, còn AES xử lý dữ liệu chính.
+10. Tài liệu tham khảo
+•	NIST, FIPS 197-upd1, Advanced Encryption Standard (AES), cập nhật 09/05/2023.
+•	NIST, FIPS 46-3, Data Encryption Standard (DES), withdrawn 19/05/2005.
+•	NIST SP 800-57 Part 1 Rev. 5, Recommendation for Key Management: Part 1 – General.
+•	Tài liệu hướng dẫn GitHub qua dòng lệnh trên Windows của môn học được cung cấp cho sinh viên.
